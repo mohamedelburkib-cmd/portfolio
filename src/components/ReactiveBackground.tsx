@@ -5,9 +5,9 @@ import { useReducedMotion } from "framer-motion";
 
 const BACKGROUND_CONFIG = {
   enabled: true,
-  glowLerp: 0.16,
-  scrollParallax: 0.05,
-  noiseDriftSpeed: 0.24,
+  glowLerp: 0.13,
+  scrollParallax: 0.04,
+  noiseDriftSpeed: 0.18,
 };
 
 export default function ReactiveBackground() {
@@ -88,15 +88,15 @@ export default function ReactiveBackground() {
       aria-hidden="true"
       className="fixed inset-0 -z-10 pointer-events-none overflow-hidden"
     >
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,#04070f_0%,#050a12_48%,#03060d_100%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_-8%,rgba(76,141,255,0.14),transparent_46%)]" />
-      <div className="absolute inset-0 opacity-22 [transform:translate3d(0,calc(var(--bg-scroll)*-1),0)] bg-[linear-gradient(to_right,rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.08)_1px,transparent_1px)] [background-size:56px_56px]" />
-      <div className="absolute inset-0 opacity-65 bg-[radial-gradient(circle_at_var(--bg-cursor-x)_var(--bg-cursor-y),rgba(76,141,255,0.22),rgba(76,141,255,0.08)_22%,transparent_44%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,#0d0f13_0%,#11131a_52%,#0f1117_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_-8%,rgba(95,168,168,0.06),transparent_46%)]" />
+      <div className="absolute inset-0 opacity-18 [transform:translate3d(0,calc(var(--bg-scroll)*-1),0)] bg-[linear-gradient(to_right,rgba(167,176,190,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(167,176,190,0.08)_1px,transparent_1px)] [background-size:58px_58px]" />
+      <div className="absolute inset-0 opacity-35 bg-[radial-gradient(circle_at_var(--bg-cursor-x)_var(--bg-cursor-y),rgba(95,168,168,0.16),rgba(95,168,168,0.04)_24%,transparent_42%)]" />
       <div
-        className="absolute inset-0 opacity-[0.08] mix-blend-normal [background-size:180px_180px] [background-position:var(--bg-noise-x)_0]"
+        className="absolute inset-0 opacity-[0.05] mix-blend-normal [background-size:180px_180px] [background-position:var(--bg-noise-x)_0]"
         style={{
           backgroundImage:
-            "radial-gradient(rgba(148,163,184,0.55) 0.55px, transparent 0.55px)",
+            "radial-gradient(rgba(167,176,190,0.45) 0.55px, transparent 0.55px)",
         }}
       />
     </div>

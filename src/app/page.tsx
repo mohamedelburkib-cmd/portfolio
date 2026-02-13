@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import HeroVisorReveal from "@/components/HeroVisorReveal";
+import Image from "next/image";
 
 const cn = (...classes: Array<string | false | null | undefined>) =>
   classes.filter(Boolean).join(" ");
@@ -21,11 +22,18 @@ const SIGNAL_STREAMS = [
   "Executive KPI reporting",
 ];
 
+const VALUE_TAGS = ["Ops Analytics", "Commercial Insights", "BI Storytelling"];
+
 type Project = {
   title: string;
   year: string;
   context: string;
   insight: string;
+  action: string;
+  result: string;
+  proofSrc: string;
+  proofLabel: string;
+  proofType: "Dashboard" | "Model" | "SQL";
   tags: string[];
   ctaHref: string;
   ctaLabel: string;
@@ -65,6 +73,11 @@ const SKILLS: SkillData[] = [
         year: "2024",
         context: "Analysed UK retail transactions to surface concentration risk.",
         insight: "Top 5 percent of customers accounted for 23 percent of revenue.",
+        action: "Prioritized high-dependency accounts for weekly monitoring and pricing guardrails.",
+        result: "Expected to reduce concentration exposure by 8-12% over two planning cycles.",
+        proofSrc: "/projects/revenue-risk-placeholder.svg",
+        proofLabel: "Dashboard preview (placeholder)",
+        proofType: "Dashboard",
         tags: ["CTEs", "Window Functions", "LAG/LEAD"],
         ctaHref: "#contact",
         ctaLabel: "Discuss this approach",
@@ -74,6 +87,11 @@ const SKILLS: SkillData[] = [
         year: "2024",
         context: "Built an action-ready customer segmentation model for retention strategy.",
         insight: "Segmented 4,300+ customers into five lifecycle-based priority cohorts.",
+        action: "Mapped each segment to retention plays and ownership across marketing and ops.",
+        result: "Expected uplift: +5-9% repeat purchase across mid-value cohorts.",
+        proofSrc: "/projects/rfm-placeholder.svg",
+        proofLabel: "Segmentation model preview (placeholder)",
+        proofType: "Model",
         tags: ["RFM", "NTILE", "Cohorts"],
         ctaHref: "#contact",
         ctaLabel: "See segmentation logic",
@@ -83,6 +101,11 @@ const SKILLS: SkillData[] = [
         year: "2024",
         context: "Mapped SKU velocity and inventory drag to improve allocation decisions.",
         insight: "Identified 127 SKUs linked to GBP45K in tied-up capital.",
+        action: "Introduced weekly exception flags to rebalance stock and de-prioritize low-yield SKUs.",
+        result: "Estimated cash release potential: GBP18K-GBP25K within first quarter of adoption.",
+        proofSrc: "/projects/kpi-model-placeholder.svg",
+        proofLabel: "SQL diagnostics preview (placeholder)",
+        proofType: "SQL",
         tags: ["Self-Joins", "Ranking", "ABC"],
         ctaHref: "#contact",
         ctaLabel: "Explore inventory insights",
@@ -100,6 +123,11 @@ const SKILLS: SkillData[] = [
         year: "2024",
         context: "Designed a KPI cockpit for leadership to monitor cross-market health.",
         insight: "Unified a GBP8.5M revenue view across 38 countries in one report surface.",
+        action: "Standardized KPI definitions and added role-based drill paths for faster reviews.",
+        result: "Estimated reporting prep time reduced by 25-35% for weekly leadership updates.",
+        proofSrc: "/projects/kpi-model-placeholder.svg",
+        proofLabel: "Data model / KPI architecture (placeholder)",
+        proofType: "Model",
         tags: ["DAX", "Star Schema", "Mobile Layout"],
         ctaHref: "#contact",
         ctaLabel: "Walk through dashboard",
@@ -117,6 +145,11 @@ const SKILLS: SkillData[] = [
         year: "2024",
         context: "Visualized lifecycle drop-off to expose the most valuable intervention points.",
         insight: "Highlighted a 67 percent first-to-repeat conversion opportunity.",
+        action: "Proposed a targeted reactivation sequence for first-time buyers within 30 days.",
+        result: "Expected conversion recovery: +4-7 percentage points in repeat purchase step.",
+        proofSrc: "/projects/revenue-risk-placeholder.svg",
+        proofLabel: "Funnel dashboard preview (placeholder)",
+        proofType: "Dashboard",
         tags: ["LOD", "Story Points", "Funnel Analysis"],
         ctaHref: "#contact",
         ctaLabel: "Review funnel narrative",
@@ -195,15 +228,44 @@ function MailIcon() {
 }
 
 function ExpandableNav({ tabs }: { tabs: NavTab[] }) {
-  const [selected, setSelected] = useState<number | null>(null);
+  const [selected, setSelected] = useState<number>(0);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setIsVisible(window.scrollY > 160);
+    const onScroll = () => setIsVisible(window.scrollY > 120);
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    const sections = tabs
+      .map((tab, index) => ({ element: document.querySelector(tab.href), index }))
+      .filter((entry): entry is { element: Element; index: number } => Boolean(entry.element));
+
+    if (!sections.length) return;
+
+    const onScroll = () => {
+      let nearest = 0;
+      let nearestDistance = Number.POSITIVE_INFINITY;
+
+      sections.forEach((section) => {
+        const rect = section.element.getBoundingClientRect();
+        const distance = Math.abs(rect.top - 120);
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          nearest = section.index;
+        }
+      });
+
+      setSelected(nearest);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [tabs]);
 
   const onSelect = (index: number, href: string) => {
     setSelected(index);
@@ -215,7 +277,8 @@ function ExpandableNav({ tabs }: { tabs: NavTab[] }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
       transition={{ duration: 0.35 }}
-      className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-1 rounded-full border border-blue-400/15 bg-black/75 p-2 shadow-2xl shadow-black/70 backdrop-blur-xl"
+      className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-1 rounded-full border p-2 backdrop-blur-xl"
+      style={{ borderColor: "var(--border)", backgroundColor: "rgba(22,26,33,0.85)" }}
       aria-label="Section navigation"
     >
       {tabs.map((tab, index) => {
@@ -227,11 +290,14 @@ function ExpandableNav({ tabs }: { tabs: NavTab[] }) {
             onClick={() => onSelect(index, tab.href)}
             className={cn(
               "group flex items-center rounded-full px-3 py-2.5 text-sm transition-all duration-300",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300/80 focus-visible:ring-offset-2 focus-visible:ring-offset-black",
-              active
-                ? "gap-2 bg-blue-400/12 text-blue-300"
-                : "text-white/55 hover:bg-white/8 hover:text-white"
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black",
+              active ? "gap-2" : "hover:bg-white/8"
             )}
+            style={{
+              color: active ? "var(--text)" : "var(--text-muted)",
+              backgroundColor: active ? "rgba(255,255,255,0.04)" : "transparent",
+              boxShadow: active ? "inset 0 -1px 0 var(--accent)" : "none",
+            }}
           >
             {tab.icon}
             <AnimatePresence initial={false}>
@@ -256,9 +322,9 @@ function ExpandableNav({ tabs }: { tabs: NavTab[] }) {
 function ChapterHeader({ number, title }: { number: string; title: string }) {
   return (
     <div className="mb-10 flex items-center gap-4">
-      <span className="font-mono text-sm text-blue-300">{number}</span>
-      <div className="h-px flex-1 bg-blue-300/30" />
-      <span className="text-xs uppercase tracking-[0.32em] text-white/35">{title}</span>
+      <span className="font-mono text-sm" style={{ color: "var(--accent)" }}>{number}</span>
+      <div className="h-px flex-1" style={{ backgroundColor: "var(--border-strong)" }} />
+      <span className="text-xs uppercase tracking-[0.24em]" style={{ color: "var(--text-muted)" }}>{title}</span>
     </div>
   );
 }
@@ -271,9 +337,9 @@ function NarrativeTransition({ label, copy }: { label: string; copy: string }) {
       viewport={{ once: true, amount: 0.4 }}
       className="mx-auto max-w-6xl px-6"
     >
-      <div className="rounded-2xl border border-blue-400/15 bg-blue-400/[0.04] px-6 py-5 md:px-8">
-        <p className="mb-2 text-xs uppercase tracking-[0.22em] text-blue-300/80">{label}</p>
-        <p className="max-w-3xl text-sm leading-relaxed text-white/65 md:text-base">{copy}</p>
+      <div className="rounded-2xl border px-6 py-5 md:px-8" style={{ borderColor: "var(--border)", backgroundColor: "rgba(255,255,255,0.01)" }}>
+        <p className="mb-2 text-xs uppercase tracking-[0.18em]" style={{ color: "var(--accent)" }}>{label}</p>
+        <p className="max-w-3xl text-sm leading-relaxed md:text-base" style={{ color: "var(--text-muted)" }}>{copy}</p>
       </div>
     </motion.div>
   );
@@ -282,7 +348,7 @@ function NarrativeTransition({ label, copy }: { label: string; copy: string }) {
 function ImpactStrip() {
   return (
     <section aria-label="Impact metrics" className="relative z-10 px-6 pb-10">
-      <div className="mx-auto grid max-w-6xl gap-3 rounded-2xl border border-blue-400/15 bg-black/35 p-3 backdrop-blur md:grid-cols-4 md:p-4">
+      <div className="mx-auto grid max-w-6xl gap-3 rounded-2xl border p-3 backdrop-blur md:grid-cols-4 md:p-4" style={{ borderColor: "var(--border)", backgroundColor: "rgba(22,26,33,0.58)" }}>
         {IMPACT_METRICS.map((metric, index) => (
           <motion.article
             key={metric.label}
@@ -290,10 +356,11 @@ function ImpactStrip() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.5 }}
             transition={{ duration: 0.35, delay: index * 0.08 }}
-            className="rounded-xl border border-white/8 bg-white/[0.02] px-4 py-3"
+            className="rounded-xl border px-4 py-3"
+            style={{ borderColor: "var(--border)", backgroundColor: "rgba(255,255,255,0.01)" }}
           >
-            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/45">{metric.label}</p>
-            <p className="mt-2 text-2xl font-semibold text-blue-300">{metric.value}</p>
+            <p className="font-mono text-[11px] uppercase tracking-[0.14em]" style={{ color: "var(--text-muted)" }}>{metric.label}</p>
+            <p className="mt-2 text-2xl font-semibold" style={{ color: "var(--text)" }}>{metric.value}</p>
           </motion.article>
         ))}
       </div>
@@ -301,22 +368,48 @@ function ImpactStrip() {
   );
 }
 
+function ValueSection() {
+  return (
+    <section className="relative z-10 px-6 pb-10" aria-label="Where I add value">
+      <div className="mx-auto max-w-6xl rounded-2xl border p-6 md:p-8" style={{ borderColor: "var(--border)", backgroundColor: "rgba(22,26,33,0.64)" }}>
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em]" style={{ color: "var(--accent)" }}>Where I add value</p>
+        <h3 className="mt-3 text-3xl uppercase tracking-tight md:text-4xl" style={{ fontFamily: "var(--font-bebas-neue), Impact, sans-serif", color: "var(--text)" }}>
+          Decision Support Built for Real Operations
+        </h3>
+        <ul className="mt-5 space-y-2 text-sm md:text-base" style={{ color: "var(--text-muted)" }}>
+          <li>Turning operational noise into decision-ready metrics.</li>
+          <li>Diagnosing risk (cost, service, concentration) before it becomes impact.</li>
+          <li>Building dashboards teams actually use with clear owners and actions.</li>
+          <li>Translating stakeholder questions into measurable signals.</li>
+        </ul>
+        <div className="mt-5 flex flex-wrap gap-2">
+          {VALUE_TAGS.map((tag) => (
+            <span key={tag} className="rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ borderColor: "var(--border-strong)", color: "var(--text)" }}>
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function SignalConsole({ reduceMotion }: { reduceMotion: boolean }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-blue-300/30 bg-black/45 p-5 backdrop-blur md:p-6">
-      <div className="pointer-events-none absolute -right-20 -top-16 h-40 w-40 rounded-full bg-blue-500/12 blur-3xl" />
-      <div className="pointer-events-none absolute -left-16 bottom-0 h-32 w-32 rounded-full bg-blue-400/10 blur-3xl" />
+    <div className="relative overflow-hidden rounded-2xl border p-5 backdrop-blur md:p-6" style={{ borderColor: "var(--border-strong)", backgroundColor: "rgba(22,26,33,0.7)" }}>
+      <div className="pointer-events-none absolute -right-20 -top-16 h-40 w-40 rounded-full blur-3xl" style={{ backgroundColor: "rgba(95,168,168,0.06)" }} />
+      <div className="pointer-events-none absolute -left-16 bottom-0 h-32 w-32 rounded-full blur-3xl" style={{ backgroundColor: "rgba(95,168,168,0.04)" }} />
 
       <div className="relative">
         <div className="flex items-center justify-between gap-4">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-blue-300/90">Signal Console</p>
-          <span className="rounded-full border border-blue-300/25 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-blue-200">
+          <p className="font-mono text-xs uppercase tracking-[0.2em]" style={{ color: "var(--accent)" }}>What I&apos;m focused on</p>
+          <span className="rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em]" style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
             Active 2026
           </span>
         </div>
 
-        <div className="mt-4 rounded-xl border border-blue-300/20 bg-[rgba(7,10,16,0.86)] p-4">
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-blue-300/85">Pipeline Flow</p>
+        <div className="mt-4 rounded-xl border p-4" style={{ borderColor: "var(--border)", backgroundColor: "rgba(11,14,18,0.82)" }}>
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: "var(--text-muted)" }}>How I work</p>
           <svg viewBox="0 0 360 96" className="mt-3 h-20 w-full">
             <path
               d="M6 52C46 18 78 82 120 52S198 18 236 52S312 82 352 48"
@@ -328,7 +421,7 @@ function SignalConsole({ reduceMotion }: { reduceMotion: boolean }) {
             <motion.path
               d="M6 52C46 18 78 82 120 52S198 18 236 52S312 82 352 48"
               fill="none"
-              stroke="rgba(96,165,250,0.95)"
+              stroke="rgba(95,168,168,0.88)"
               strokeWidth="2.2"
               strokeLinecap="round"
               strokeDasharray="20 120"
@@ -336,29 +429,30 @@ function SignalConsole({ reduceMotion }: { reduceMotion: boolean }) {
               animate={reduceMotion ? { strokeDashoffset: 0 } : { strokeDashoffset: [120, 0] }}
               transition={reduceMotion ? { duration: 0 } : { duration: 2.8, ease: "linear", repeat: Infinity }}
             />
-            <circle cx="120" cy="52" r="4" fill="rgba(147,197,253,0.95)" />
-            <circle cx="236" cy="52" r="4" fill="rgba(147,197,253,0.95)" />
+            <circle cx="120" cy="52" r="4" fill="rgba(95,168,168,0.88)" />
+            <circle cx="236" cy="52" r="4" fill="rgba(95,168,168,0.88)" />
           </svg>
         </div>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <article className="rounded-xl border border-white/10 bg-black/35 p-3.5">
-            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-blue-300/85">Primary Stack</p>
-            <p className="mt-1 text-sm text-white/80">SQL, Power BI, Tableau</p>
+          <article className="rounded-xl border p-3.5" style={{ borderColor: "var(--border)", backgroundColor: "rgba(11,14,18,0.72)" }}>
+            <p className="font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: "var(--text-muted)" }}>Primary Stack</p>
+            <p className="mt-1 text-sm" style={{ color: "var(--text)" }}>SQL, Power BI, Tableau</p>
           </article>
-          <article className="rounded-xl border border-white/10 bg-black/35 p-3.5">
-            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-blue-300/85">Current Build</p>
-            <p className="mt-1 text-sm text-white/80">Logistics-to-revenue signal model</p>
+          <article className="rounded-xl border p-3.5" style={{ borderColor: "var(--border)", backgroundColor: "rgba(11,14,18,0.72)" }}>
+            <p className="font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: "var(--text-muted)" }}>What I&apos;ve shipped</p>
+            <p className="mt-1 text-sm" style={{ color: "var(--text)" }}>Risk mapping, cohort diagnostics, KPI governance</p>
           </article>
         </div>
 
-        <div className="mt-3 rounded-xl border border-white/10 bg-black/35 p-4">
-          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-blue-300/85">Focus Streams</p>
+        <div className="mt-3 rounded-xl border p-4" style={{ borderColor: "var(--border)", backgroundColor: "rgba(11,14,18,0.72)" }}>
+          <p className="font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: "var(--text-muted)" }}>Focus Streams</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {SIGNAL_STREAMS.map((stream) => (
               <span
                 key={stream}
-                className="rounded-full border border-blue-300/25 bg-blue-400/[0.08] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-blue-100"
+                className="rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em]"
+                style={{ borderColor: "var(--border)", color: "var(--text)" }}
               >
                 {stream}
               </span>
@@ -376,37 +470,39 @@ function FeaturedCaseStudy() {
       initial={{ opacity: 0, y: 22 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.35 }}
-      className="mt-14 rounded-2xl border border-blue-300/25 bg-blue-500/[0.06] p-6 md:p-8"
+      className="mt-14 rounded-2xl border p-6 md:p-8"
+      style={{ borderColor: "var(--border-strong)", backgroundColor: "rgba(22,26,33,0.74)" }}
     >
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.28em] text-blue-300/80">Featured Case Study</p>
+          <p className="text-xs uppercase tracking-[0.2em]" style={{ color: "var(--accent)" }}>Featured Case Study</p>
           <h3
-            className="mt-2 text-3xl uppercase tracking-tight text-white md:text-4xl"
-            style={{ fontFamily: "var(--font-bebas-neue), Impact, sans-serif" }}
+            className="mt-2 text-3xl uppercase tracking-tight md:text-4xl"
+            style={{ fontFamily: "var(--font-bebas-neue), Impact, sans-serif", color: "var(--text)" }}
           >
             Revenue Risk Mapping
           </h3>
         </div>
         <a
           href="#work"
-          className="rounded-full border border-blue-300/30 px-4 py-2 text-sm text-blue-200 transition hover:border-blue-300/60 hover:bg-blue-400/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300/80 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+          className="rounded-full border px-4 py-2 text-sm transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2"
+          style={{ borderColor: "var(--border-strong)", color: "var(--text)" }}
         >
-          View Work
+          Open case study
         </a>
       </div>
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-xl border border-white/10 bg-black/30 p-4">
-          <p className="mb-1 font-mono text-[11px] uppercase tracking-[0.18em] text-blue-300/70">Problem</p>
-          <p className="text-sm text-white/70">Revenue exposure was hidden inside uneven customer concentration.</p>
+        <div className="rounded-xl border p-4" style={{ borderColor: "var(--border)", backgroundColor: "rgba(11,14,18,0.72)" }}>
+          <p className="mb-1 font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--text-muted)" }}>Problem</p>
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>Revenue exposure was hidden inside uneven customer concentration.</p>
         </div>
-        <div className="rounded-xl border border-white/10 bg-black/30 p-4">
-          <p className="mb-1 font-mono text-[11px] uppercase tracking-[0.18em] text-blue-300/70">Approach</p>
-          <p className="text-sm text-white/70">Used cohort slices and rank windows to isolate dependency clusters.</p>
+        <div className="rounded-xl border p-4" style={{ borderColor: "var(--border)", backgroundColor: "rgba(11,14,18,0.72)" }}>
+          <p className="mb-1 font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--text-muted)" }}>Approach</p>
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>Used cohort slices and rank windows to isolate dependency clusters.</p>
         </div>
-        <div className="rounded-xl border border-white/10 bg-black/30 p-4">
-          <p className="mb-1 font-mono text-[11px] uppercase tracking-[0.18em] text-blue-300/70">Outcome</p>
-          <p className="text-sm text-white/70">Identified a 23 percent concentration signal and converted it into flags.</p>
+        <div className="rounded-xl border p-4" style={{ borderColor: "var(--border)", backgroundColor: "rgba(11,14,18,0.72)" }}>
+          <p className="mb-1 font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--text-muted)" }}>Outcome</p>
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>Identified a 23 percent concentration signal and converted it into a weekly decision routine.</p>
         </div>
       </div>
     </motion.article>
@@ -417,11 +513,15 @@ function SkillCard({ skill, isActive, onToggle }: { skill: SkillData; isActive: 
   return (
     <div
       className={cn(
-        "rounded-2xl border transition-all duration-500",
+        "rounded-2xl border transition-all duration-300",
         isActive
-          ? "border-blue-300/40 bg-blue-400/[0.06] shadow-[0_0_0_1px_rgba(76,141,255,0.18),0_24px_60px_rgba(76,141,255,0.08)]"
-          : "border-white/10 bg-white/[0.02]"
+          ? "shadow-[0_8px_30px_rgba(0,0,0,0.22)]"
+          : ""
       )}
+      style={{
+        borderColor: isActive ? "var(--border-strong)" : "var(--border)",
+        backgroundColor: isActive ? "rgba(27,34,48,0.34)" : "rgba(255,255,255,0.01)",
+      }}
     >
       <button
         type="button"
@@ -430,24 +530,25 @@ function SkillCard({ skill, isActive, onToggle }: { skill: SkillData; isActive: 
         aria-controls={`${skill.id}-projects`}
         className={cn(
           "flex w-full items-start justify-between gap-4 p-5 text-left md:p-6",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300/80 focus-visible:ring-inset"
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset"
         )}
+        style={{ ["--tw-ring-color" as string]: "rgba(237,239,242,0.28)" }}
       >
         <div>
           <h3
             className={cn(
               "text-3xl uppercase tracking-tight md:text-4xl",
-              isActive ? "text-blue-300" : "text-white"
+              isActive ? "" : "text-white"
             )}
-            style={{ fontFamily: "var(--font-bebas-neue), Impact, sans-serif" }}
+            style={{ fontFamily: "var(--font-bebas-neue), Impact, sans-serif", color: isActive ? "var(--accent)" : "var(--text)" }}
           >
             {skill.name}
           </h3>
-          <p className="mt-2 text-sm text-white/55">{skill.description}</p>
+          <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>{skill.description}</p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="font-mono text-xs uppercase tracking-[0.16em] text-white/40">{skill.projectCount} projects</span>
-          <motion.span animate={{ rotate: isActive ? 45 : 0 }} className={cn("text-lg", isActive ? "text-blue-300" : "text-white/35")}>
+          <span className="font-mono text-xs uppercase tracking-[0.14em]" style={{ color: "var(--text-muted)" }}>{skill.projectCount} projects</span>
+          <motion.span animate={{ rotate: isActive ? 45 : 0 }} className="text-lg" style={{ color: isActive ? "var(--accent)" : "var(--text-muted)" }}>
             +
           </motion.span>
         </div>
@@ -461,36 +562,59 @@ function SkillCard({ skill, isActive, onToggle }: { skill: SkillData; isActive: 
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.35 }}
-            className="overflow-hidden border-t border-blue-300/20"
+            className="overflow-hidden border-t"
+            style={{ borderColor: "var(--border)" }}
           >
-            <div className="grid gap-4 p-5 md:grid-cols-2 md:p-6">
+            <div className="grid gap-4 p-5 md:p-6">
               {skill.projects.map((project, index) => (
                 <motion.article
                   key={project.title}
                   initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.08 }}
-                  className="rounded-xl border border-white/10 bg-black/35 p-4"
+                  className="rounded-2xl border p-4 md:p-5"
+                  style={{ borderColor: "var(--border)", backgroundColor: "rgba(11,14,18,0.72)" }}
                 >
                   <div className="mb-3 flex items-center justify-between">
-                    <h4 className="text-lg font-semibold text-white">{project.title}</h4>
-                    <span className="font-mono text-xs text-white/40">{project.year}</span>
+                    <h4 className="text-lg font-semibold" style={{ color: "var(--text)" }}>{project.title}</h4>
+                    <span className="font-mono text-xs" style={{ color: "var(--text-muted)" }}>{project.year}</span>
                   </div>
-                  <p className="text-sm text-white/62">{project.context}</p>
-                  <div className="my-4 rounded-lg border-l-2 border-blue-300 bg-blue-400/[0.07] px-3 py-2">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-blue-300/80">Insight</p>
-                    <p className="mt-1 text-sm text-blue-100">{project.insight}</p>
+                  <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>{project.context}</p>
+
+                  <div className="mt-4 overflow-hidden rounded-xl border" style={{ borderColor: "var(--border)" }}>
+                    <Image
+                      src={project.proofSrc}
+                      alt={project.proofLabel}
+                      width={960}
+                      height={540}
+                      className="h-auto w-full object-cover"
+                    />
+                    <div className="flex items-center justify-between border-t px-3 py-2" style={{ borderColor: "var(--border)", backgroundColor: "rgba(14,15,18,0.8)" }}>
+                      <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--text-muted)" }}>{project.proofLabel}</p>
+                      <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--accent)" }}>{project.proofType}</span>
+                    </div>
                   </div>
-                  <div className="mb-4 flex flex-wrap gap-2">
+
+                  <div className="mt-4 space-y-2 rounded-xl border p-3" style={{ borderColor: "var(--border)", backgroundColor: "rgba(22,26,33,0.52)" }}>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: "var(--accent)" }}>Insight</p>
+                    <p className="text-sm" style={{ color: "var(--text)" }}>{project.insight}</p>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: "var(--accent)" }}>Action</p>
+                    <p className="text-sm" style={{ color: "var(--text)" }}>{project.action}</p>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: "var(--accent)" }}>Result</p>
+                    <p className="text-sm" style={{ color: "var(--text)" }}>{project.result}</p>
+                  </div>
+
+                  <div className="mb-4 mt-4 flex flex-wrap gap-2">
                     {project.tags.map((tag) => (
-                      <span key={tag} className="rounded-full border border-white/12 bg-white/[0.02] px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-white/50">
+                      <span key={tag} className="rounded-full border px-2 py-1 font-mono text-[10px] uppercase tracking-wider" style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
                         {tag}
                       </span>
                     ))}
                   </div>
                   <a
                     href={project.ctaHref}
-                    className="inline-flex rounded-full border border-blue-300/30 px-3 py-1.5 text-xs text-blue-200 transition hover:border-blue-300/70 hover:bg-blue-400/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300/80 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                    className="inline-flex rounded-full border px-3 py-1.5 text-xs transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2"
+                    style={{ borderColor: "var(--border-strong)", color: "var(--text)" }}
                   >
                     {project.ctaLabel}
                   </a>
@@ -504,25 +628,26 @@ function SkillCard({ skill, isActive, onToggle }: { skill: SkillData; isActive: 
   );
 }
 
-function TimelineItem({ entry }: { entry: JourneyEntry }) {
+function TimelineItem({ entry, isActive }: { entry: JourneyEntry; isActive: boolean }) {
   return (
     <motion.article
       initial={{ opacity: 0.42, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: false, amount: 0.4 }}
       transition={{ duration: 0.35 }}
-      className="relative pb-10 pl-9 last:pb-0"
+      className="relative rounded-xl pb-10 pl-9 pr-3 pt-2 last:pb-2"
+      style={{ backgroundColor: isActive ? "rgba(27,34,48,0.34)" : "transparent" }}
     >
       {!entry.isLast ? (
-        <span className="absolute left-[11px] top-6 bottom-0 w-px bg-blue-300/35" />
+        <span className="absolute left-[11px] top-6 bottom-0 w-px" style={{ backgroundColor: "var(--border-strong)" }} />
       ) : null}
-      <span className="absolute left-0 top-1.5 flex h-6 w-6 items-center justify-center rounded-full border border-blue-300/60 bg-black shadow-[0_0_18px_rgba(76,141,255,0.32)]">
-        <span className="h-2 w-2 rounded-full bg-blue-300" />
+      <span className="absolute left-0 top-1.5 flex h-6 w-6 items-center justify-center rounded-full border bg-black" style={{ borderColor: "var(--border-strong)" }}>
+        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: isActive ? "var(--accent)" : "var(--text-muted)" }} />
       </span>
-      <p className="font-mono text-xs uppercase tracking-[0.2em] text-blue-300">{entry.year}</p>
-      <h4 className="mt-2 text-xl font-semibold text-white">{entry.title}</h4>
-      <p className="mt-2 text-sm leading-relaxed text-white/60">{entry.description}</p>
-      <p className="mt-3 rounded-lg border border-blue-300/20 bg-blue-400/[0.06] px-3 py-2 text-sm text-blue-100">
+      <p className="font-mono text-xs uppercase tracking-[0.16em]" style={{ color: isActive ? "var(--accent)" : "var(--text-muted)" }}>{entry.year}</p>
+      <h4 className="mt-2 text-xl font-semibold" style={{ color: "var(--text)" }}>{entry.title}</h4>
+      <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>{entry.description}</p>
+      <p className="mt-3 rounded-lg border px-3 py-2 text-sm" style={{ borderColor: "var(--border)", color: "var(--text)" }}>
         {entry.outcome}
       </p>
     </motion.article>
@@ -531,6 +656,7 @@ function TimelineItem({ entry }: { entry: JourneyEntry }) {
 
 export default function Portfolio() {
   const [activeSkill, setActiveSkill] = useState<string>("sql");
+  const [activeJourney, setActiveJourney] = useState(0);
   const [copied, setCopied] = useState(false);
   const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll();
@@ -553,33 +679,57 @@ export default function Portfolio() {
     window.setTimeout(() => setCopied(false), 1800);
   };
 
+  useEffect(() => {
+    const timelineItems = Array.from(document.querySelectorAll("[data-journey-index]"));
+    if (!timelineItems.length) return;
+
+    const onScroll = () => {
+      let nearest = 0;
+      let nearestDistance = Number.POSITIVE_INFINITY;
+
+      timelineItems.forEach((item) => {
+        const rect = item.getBoundingClientRect();
+        const distance = Math.abs(rect.top - window.innerHeight * 0.32);
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          nearest = Number(item.getAttribute("data-journey-index") ?? 0);
+        }
+      });
+
+      setActiveJourney(nearest);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <div className="relative min-h-screen overflow-x-clip text-white" style={{ backgroundColor: "var(--background)" }}>
       <ExpandableNav tabs={navTabs} />
-      <div className="pointer-events-none fixed inset-0 z-0 bg-[rgba(7,9,12,0.18)]" />
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[rgba(14,15,18,0.18)]" />
 
       <motion.header
         style={{ opacity: headerOpacity }}
         className="fixed left-0 right-0 top-0 z-40 px-6 py-4"
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between rounded-full border px-4 py-2 backdrop-blur" style={{ borderColor: "var(--border-accent)", backgroundColor: "rgba(11,15,20,0.68)" }}>
-          <p className="flex items-center gap-3 text-sm tracking-wide text-white/85">
+          <p className="flex items-center gap-3 text-sm tracking-wide" style={{ color: "var(--text)" }}>
             <span className="font-semibold">M.E-B</span>
             <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: "var(--accent)" }} />
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: "var(--accent)" }}>System Online</span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--accent)" }}>Available for new roles</span>
           </p>
-          <button
-            type="button"
-            onClick={copyEmail}
+          <a
+            href="#contact"
             className="rounded-full border px-3 py-1.5 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
             style={{ borderColor: "var(--border-accent)", color: "var(--foreground)" }}
           >
-            {copied ? "Copied" : "Contact"}
-          </button>
+            Let&apos;s talk
+          </a>
         </div>
       </motion.header>
 
-      <section id="hero" className="relative z-10 flex min-h-screen items-center px-6 pb-14 pt-28">
+      <section id="hero" className="relative z-10 flex min-h-screen scroll-mt-24 items-center px-6 pb-14 pt-28">
         <div className="mx-auto grid w-full max-w-6xl gap-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <div>
             <HeroVisorReveal
@@ -588,11 +738,18 @@ export default function Portfolio() {
               roleLine="DATA ANALYST"
               hudLabel="PROFILE REVEAL"
             />
+            <p className="mt-4 text-base md:text-lg" style={{ color: "var(--text)" }}>
+              Data Analyst - Operations, Commercial and Risk Analytics
+            </p>
+            <p className="mt-1 text-sm md:text-base" style={{ color: "var(--text-muted)" }}>
+              SQL • Power BI • Tableau • Storytelling • Decision Support
+            </p>
             <motion.p
               initial={reduceMotion ? false : { opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={reduceMotion ? { duration: 0 } : { delay: 1.45, duration: 0.4 }}
-              className="mt-7 max-w-xl text-base leading-relaxed text-white/65 md:text-lg"
+              className="mt-7 max-w-xl text-base leading-relaxed md:text-lg"
+              style={{ color: "var(--text-muted)" }}
             >
               Transforming operational reality into decision-ready analytics. I bridge warehouse pressure,
               commercial priorities, and dashboard clarity so teams can act with confidence.
@@ -606,7 +763,7 @@ export default function Portfolio() {
               <a
                 href="#work"
                 className="rounded-full px-5 py-2.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-                style={{ backgroundColor: "var(--accent)", color: "#07090C" }}
+                style={{ backgroundColor: "var(--accent)", color: "#0E0F12" }}
               >
                 View Work
               </a>
@@ -632,6 +789,7 @@ export default function Portfolio() {
       </section>
 
       <ImpactStrip />
+      <ValueSection />
 
       <section className="relative z-10 py-8">
         <NarrativeTransition
@@ -640,7 +798,7 @@ export default function Portfolio() {
         />
       </section>
 
-      <section id="work" className="relative z-10 px-6 py-20">
+      <section id="work" className="relative z-10 scroll-mt-24 px-6 py-20">
         <div className="mx-auto max-w-6xl">
           <ChapterHeader number="02" title="Tools + Proof" />
           <motion.h2
@@ -650,9 +808,9 @@ export default function Portfolio() {
             className="text-5xl uppercase tracking-tight text-white md:text-7xl"
             style={{ fontFamily: "var(--font-bebas-neue), Impact, sans-serif" }}
           >
-            Tools of the <span className="text-blue-300">Trade</span>
+            Tools of the <span style={{ color: "var(--accent)" }}>Trade</span>
           </motion.h2>
-          <p className="mt-4 max-w-2xl text-white/55">
+          <p className="mt-4 max-w-2xl" style={{ color: "var(--text-muted)" }}>
             Expand each category to review project context, insight statements, core methods, and a next-step CTA.
           </p>
 
@@ -678,45 +836,47 @@ export default function Portfolio() {
         />
       </section>
 
-      <section id="story" className="relative z-10 px-6 py-20">
+      <section id="story" className="relative z-10 scroll-mt-24 px-6 py-20">
         <div className="mx-auto max-w-6xl">
           <ChapterHeader number="03" title="Journey" />
           <div className="grid gap-14 lg:grid-cols-[0.95fr_1.05fr]">
             <div>
               <h2
-                className="text-5xl uppercase tracking-tight text-white md:text-7xl"
-                style={{ fontFamily: "var(--font-bebas-neue), Impact, sans-serif" }}
+                className="text-5xl uppercase tracking-tight md:text-7xl"
+                style={{ fontFamily: "var(--font-bebas-neue), Impact, sans-serif", color: "var(--text)" }}
               >
-                From Warehouse <span className="text-blue-300">to Dashboard</span>
+                From Warehouse <span style={{ color: "var(--accent)" }}>to Dashboard</span>
               </h2>
-              <p className="mt-5 max-w-xl text-white/62">
+              <p className="mt-5 max-w-xl" style={{ color: "var(--text-muted)" }}>
                 I approach analytics from operational truth first. That background makes my reporting practical,
                 grounded, and focused on decisions that can actually be executed.
               </p>
 
-              <div className="mt-7 rounded-xl border border-blue-300/20 bg-blue-400/[0.05] p-4">
-                <p className="font-mono text-xs uppercase tracking-[0.18em] text-blue-300/80">What I do now</p>
-                <ul className="mt-3 space-y-2 text-sm text-white/72">
-                  <li>Convert raw operations and sales data into risk and growth narratives.</li>
-                  <li>Build SQL and BI workflows that expose high-impact drivers quickly.</li>
-                  <li>Frame insights with clear actions for business and operations stakeholders.</li>
-                  <li>Prioritize outcomes with measurable performance deltas and accountability.</li>
+              <div className="mt-7 rounded-xl border p-4" style={{ borderColor: "var(--border)", backgroundColor: "rgba(22,26,33,0.54)" }}>
+                <p className="font-mono text-xs uppercase tracking-[0.16em]" style={{ color: "var(--accent)" }}>What I do now</p>
+                <ul className="mt-3 space-y-2 text-sm" style={{ color: "var(--text)" }}>
+                  <li>Build diagnostic dashboards that speed decisions.</li>
+                  <li>Identify operational constraints and risk before escalation.</li>
+                  <li>Turn messy processes into measurable, trackable flows.</li>
+                  <li>Translate stakeholder questions into clear KPI paths.</li>
                 </ul>
               </div>
 
-              <div className="mt-4 rounded-xl border border-white/12 bg-white/[0.02] p-4">
-                <p className="font-mono text-xs uppercase tracking-[0.18em] text-blue-300/80">What I am learning / building</p>
-                <ul className="mt-3 space-y-2 text-sm text-white/68">
-                  <li>Deeper statistical testing for conversion and retention diagnostics.</li>
-                  <li>Reusable BI templates that reduce setup time for repeat reporting use cases.</li>
-                  <li>Now building: a logistics-to-revenue signal map for faster issue triage.</li>
+              <div className="mt-4 rounded-xl border p-4" style={{ borderColor: "var(--border)", backgroundColor: "rgba(255,255,255,0.01)" }}>
+                <p className="font-mono text-xs uppercase tracking-[0.16em]" style={{ color: "var(--accent)" }}>What I&apos;m building / learning</p>
+                <ul className="mt-3 space-y-2 text-sm" style={{ color: "var(--text-muted)" }}>
+                  <li>Portfolio of SQL, Power BI, and Tableau case studies with proof artefacts.</li>
+                  <li>Deeper analytics engineering practices for reusable reporting pipelines.</li>
+                  <li>Operational signal models linking process bottlenecks to commercial outcomes.</li>
                 </ul>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-black/30 p-5 md:p-6">
-              {JOURNEY_ENTRIES.map((entry) => (
-                <TimelineItem key={entry.title} entry={entry} />
+            <div className="rounded-2xl border p-5 md:p-6" style={{ borderColor: "var(--border)", backgroundColor: "rgba(22,26,33,0.48)" }}>
+              {JOURNEY_ENTRIES.map((entry, index) => (
+                <div key={entry.title} data-journey-index={index}>
+                  <TimelineItem entry={entry} isActive={activeJourney === index} />
+                </div>
               ))}
             </div>
           </div>
@@ -730,38 +890,38 @@ export default function Portfolio() {
         />
       </section>
 
-      <section id="contact" className="relative z-10 px-6 py-20">
+      <section id="contact" className="relative z-10 scroll-mt-24 px-6 py-20">
         <div className="mx-auto max-w-6xl">
           <ChapterHeader number="04" title="Connect" />
           <div className="grid gap-12 lg:grid-cols-[1fr_1fr]">
             <div>
               <h2
-                className="text-5xl uppercase tracking-tight text-white md:text-7xl"
-                style={{ fontFamily: "var(--font-bebas-neue), Impact, sans-serif" }}
+                className="text-5xl uppercase tracking-tight md:text-7xl"
+                style={{ fontFamily: "var(--font-bebas-neue), Impact, sans-serif", color: "var(--text)" }}
               >
-                Let&apos;s Build <span className="text-blue-300">Something Useful</span>
+                Ways to Work <span style={{ color: "var(--accent)" }}>With Me</span>
               </h2>
-              <p className="mt-4 max-w-xl text-white/62">
-                Open to analyst roles and project collaborations where rigorous data work improves decision speed and business clarity.
+              <p className="mt-4 max-w-xl" style={{ color: "var(--text-muted)" }}>
+                Open to analyst roles and project collaborations where rigorous analytics improves decision speed and operating clarity.
               </p>
 
               <div className="mt-7 grid gap-3">
-                <article className="rounded-xl border border-blue-300/25 bg-blue-400/[0.06] p-4">
-                  <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-blue-300/90">Hire me</p>
-                  <p className="mt-1 text-sm text-white/80">Data Analyst roles focused on commercial, risk, or logistics insight.</p>
+                <article className="rounded-xl border p-4" style={{ borderColor: "var(--border-strong)", backgroundColor: "rgba(22,26,33,0.58)" }}>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--accent)" }}>Hiring</p>
+                  <p className="mt-1 text-sm" style={{ color: "var(--text)" }}>Data Analyst / BI Analyst roles focused on commercial, risk, or operations insight.</p>
                 </article>
-                <article className="rounded-xl border border-white/12 bg-white/[0.02] p-4">
-                  <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-blue-300/90">Collaborate</p>
-                  <p className="mt-1 text-sm text-white/75">Dashboards, analysis workflows, and lightweight automation opportunities.</p>
+                <article className="rounded-xl border p-4" style={{ borderColor: "var(--border)", backgroundColor: "rgba(255,255,255,0.01)" }}>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--accent)" }}>Collaboration</p>
+                  <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>Dashboards, analytics workflows, and lightweight automation support.</p>
                 </article>
-                <article className="rounded-xl border border-white/12 bg-white/[0.02] p-4">
-                  <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-blue-300/90">Ask about a project</p>
-                  <p className="mt-1 text-sm text-white/75">Happy to break down SQL, Power BI, and Tableau decisions in detail.</p>
+                <article className="rounded-xl border p-4" style={{ borderColor: "var(--border)", backgroundColor: "rgba(255,255,255,0.01)" }}>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--accent)" }}>Project Discussion</p>
+                  <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>SQL design, segmentation logic, KPI frameworks, and reporting decisions.</p>
                 </article>
               </div>
 
-              <p className="mt-6 rounded-lg border border-blue-300/20 bg-black/30 px-4 py-3 text-sm text-blue-100">
-                Availability: open to UK-based and remote opportunities. Preferred contact: email. Typical response time: within 24 hours.
+              <p className="mt-6 rounded-lg border px-4 py-3 text-sm" style={{ borderColor: "var(--border)", color: "var(--text)" }}>
+                Preferred contact: email. Typical response time: within 24 hours. Location/timezone: UK.
               </p>
             </div>
 
@@ -769,50 +929,53 @@ export default function Portfolio() {
               <button
                 type="button"
                 onClick={copyEmail}
-                className="group flex w-full items-center justify-between rounded-2xl border border-blue-300/25 bg-blue-400/[0.06] p-5 text-left transition hover:border-blue-300/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300/80 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                className="group flex w-full items-center justify-between rounded-2xl border p-5 text-left transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                style={{ borderColor: "var(--border-strong)", backgroundColor: "rgba(22,26,33,0.58)" }}
               >
                 <div>
-                  <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-blue-300/90">Email</p>
-                  <p className="mt-1 text-base text-white">{email}</p>
-                  <p className="mt-1 text-xs text-white/55">Best for hiring and project discussions.</p>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--accent)" }}>Email</p>
+                  <p className="mt-1 text-base" style={{ color: "var(--text)" }}>{email}</p>
+                  <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>Best for hiring and project discussions.</p>
                 </div>
-                <span className="text-blue-200">{copied ? "Copied" : "Open"}</span>
+                <span style={{ color: "var(--text)" }}>{copied ? "Copied" : "Open"}</span>
               </button>
 
               <a
                 href="https://linkedin.com/in/mohamedelburki"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex w-full items-center justify-between rounded-2xl border border-white/12 bg-white/[0.02] p-5 transition hover:border-blue-300/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300/80 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                className="group flex w-full items-center justify-between rounded-2xl border p-5 transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                style={{ borderColor: "var(--border)", backgroundColor: "rgba(255,255,255,0.01)" }}
               >
                 <div>
-                  <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-blue-300/90">LinkedIn</p>
-                  <p className="mt-1 text-base text-white">Mohamed El-Burki</p>
-                  <p className="mt-1 text-xs text-white/55">Quick links: profile updates and experience history.</p>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--accent)" }}>LinkedIn</p>
+                  <p className="mt-1 text-base" style={{ color: "var(--text)" }}>Mohamed El-Burki</p>
+                  <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>Quick links: profile updates and experience history.</p>
                 </div>
-                <span className="text-white/40 transition group-hover:text-blue-200">Open</span>
+                <span className="transition" style={{ color: "var(--text-muted)" }}>Open</span>
               </a>
 
               <a
                 href="https://github.com/mohamedelburkib-cmd"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex w-full items-center justify-between rounded-2xl border border-white/12 bg-white/[0.02] p-5 transition hover:border-blue-300/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300/80 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                className="group flex w-full items-center justify-between rounded-2xl border p-5 transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                style={{ borderColor: "var(--border)", backgroundColor: "rgba(255,255,255,0.01)" }}
               >
                 <div>
-                  <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-blue-300/90">GitHub</p>
-                  <p className="mt-1 text-base text-white">mohamedelburkib-cmd</p>
-                  <p className="mt-1 text-xs text-white/55">Quick links: code samples and technical breakdowns.</p>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--accent)" }}>GitHub</p>
+                  <p className="mt-1 text-base" style={{ color: "var(--text)" }}>mohamedelburkib-cmd</p>
+                  <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>Quick links: code samples and technical breakdowns.</p>
                 </div>
-                <span className="text-white/40 transition group-hover:text-blue-200">Open</span>
+                <span className="transition" style={{ color: "var(--text-muted)" }}>Open</span>
               </a>
             </div>
           </div>
         </div>
       </section>
 
-      <footer className="relative z-10 mb-24 border-t border-white/8 px-6 py-8">
-        <div className="mx-auto flex max-w-6xl items-center justify-between text-xs text-white/35">
+      <footer className="relative z-10 mb-24 border-t px-6 py-8" style={{ borderColor: "var(--border)" }}>
+        <div className="mx-auto flex max-w-6xl items-center justify-between text-xs" style={{ color: "var(--text-muted)" }}>
           <p>(c) 2026 Mohamed El-Burki</p>
           <p>Built with Next.js + Framer Motion</p>
         </div>

@@ -54,7 +54,7 @@
 
 .revealText {
   color: #eaf1ff;
-  text-shadow: 0 0 24px rgba(76, 141, 255, 0.24);
+  text-shadow: 0 0 10px rgba(95, 168, 168, 0.14);
 }
 
 .roleSwap {
@@ -114,14 +114,14 @@
   transform: translate(-50%, -50%);
   border: 1px solid var(--border-accent);
   border-radius: 999px;
-  box-shadow: 0 8px 22px rgba(76, 141, 255, 0.2);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
   pointer-events: none;
 }
 
 .noise {
   position: absolute;
   inset: 0;
-  opacity: var(--scanline-opacity, 0.08);
+  opacity: var(--scanline-opacity, 0.03);
   background-image:
     repeating-linear-gradient(
       to bottom,

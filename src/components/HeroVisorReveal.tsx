@@ -7,7 +7,7 @@ import styles from "./HeroVisorReveal.module.css";
 export const VISOR_W = 320;
 export const VISOR_H = 168;
 export const LERP = 0.2;
-export const SCANLINE_OPACITY = 0.08;
+export const SCANLINE_OPACITY = 0.03;
 
 const TAGS = ["SQL", "Power BI", "Tableau", "Ops Analytics"];
 const SWEEP_DURATION_S = 1.12;
@@ -25,7 +25,7 @@ export default function HeroVisorReveal({
   nameLine1,
   nameLine2,
   roleLine = "DATA ANALYST",
-  hudLabel = "SCANNING PROFILE",
+  hudLabel = "PROFILE",
 }: HeroVisorRevealProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
@@ -180,9 +180,9 @@ export default function HeroVisorReveal({
           <span className="block">{nameLine1}</span>
           <span className={styles.roleSwap}>{roleLine}</span>
         </h1>
-        <p className={styles.revealMeta}>OPERATIONS TO ANALYTICS</p>
+        <p className={styles.revealMeta}>OPERATIONS, COMMERCIAL AND RISK ANALYTICS</p>
         <p className={styles.tags}>
-          <span className={styles.tagAccent}>SYSTEM ONLINE</span>
+          <span className={styles.tagAccent}>FOCUS</span>
           <span> | </span>
           <span>{staticReveal ? TAGS.join(" | ") : TAGS[tagIndex]}</span>
         </p>

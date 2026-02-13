@@ -1,0 +1,10 @@
+<svg width="960" height="540" viewBox="0 0 960 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="540" rx="16" fill="#161A21"/>
+  <rect x="40" y="40" width="880" height="460" rx="12" fill="#1B2230" stroke="rgba(237,239,242,0.14)"/>
+  <text x="72" y="96" fill="#EDEFF2" font-family="Segoe UI, sans-serif" font-size="28" font-weight="700">Dashboard preview (placeholder)</text>
+  <text x="72" y="128" fill="#A7B0BE" font-family="Segoe UI, sans-serif" font-size="18">Revenue Risk Mapping</text>
+  <rect x="72" y="168" width="330" height="146" rx="10" fill="#161A21" stroke="rgba(237,239,242,0.08)"/>
+  <rect x="426" y="168" width="462" height="146" rx="10" fill="#161A21" stroke="rgba(237,239,242,0.08)"/>
+  <rect x="72" y="338" width="816" height="122" rx="10" fill="#161A21" stroke="rgba(237,239,242,0.08)"/>
+  <path d="M110 420C190 372 240 444 316 402C380 366 448 404 510 384C585 360 657 428 846 374" stroke="#5FA8A8" stroke-width="4" stroke-linecap="round"/>
+</svg>
