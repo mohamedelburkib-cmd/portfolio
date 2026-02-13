@@ -1,0 +1,195 @@
+.root {
+  --mx: 50%;
+  --my: 46%;
+  --vw: 320px;
+  --vh: 168px;
+  --soft: 62%;
+  position: relative;
+  color: var(--foreground);
+  outline: none;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-bebas-neue), Impact, sans-serif;
+  font-size: clamp(4rem, 13vw, 7.8rem);
+  line-height: 0.84;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.baseLayer {
+  position: relative;
+  opacity: 1;
+  color: var(--text-muted);
+}
+
+.baseTitle {
+  color: rgba(148, 163, 184, 0.34);
+  text-shadow: none;
+}
+
+.revealLayer {
+  position: absolute;
+  inset: 0;
+  color: var(--foreground);
+  pointer-events: none;
+}
+
+/* Prefer mask-image for soft edges, fallback to clip-path below. */
+.revealMask {
+  -webkit-mask-image: radial-gradient(
+    ellipse calc(var(--vw) * 0.54) calc(var(--vh) * 0.58) at var(--mx) var(--my),
+    #000 0%,
+    #000 var(--soft),
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse calc(var(--vw) * 0.54) calc(var(--vh) * 0.58) at var(--mx) var(--my),
+    #000 0%,
+    #000 var(--soft),
+    transparent 100%
+  );
+}
+
+.revealText {
+  color: #eaf1ff;
+  text-shadow: 0 0 24px rgba(76, 141, 255, 0.24);
+}
+
+.roleSwap {
+  display: block;
+  margin-top: 0.42rem;
+  font-family: var(--font-body), "Segoe UI", sans-serif;
+  font-size: clamp(1.22rem, 3.2vw, 2rem);
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  line-height: 1.06;
+  white-space: nowrap;
+  color: #dbeafe;
+}
+
+.hud {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.35rem;
+  border: 1px solid var(--border-accent);
+  border-radius: 0.35rem;
+  background: rgba(5, 7, 11, 0.78);
+  color: var(--accent);
+  font-size: 0.61rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.45rem;
+}
+
+.revealMeta {
+  margin-top: 0.72rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #93c5fd;
+}
+
+.tags {
+  margin-top: 0.42rem;
+  font-size: 0.71rem;
+  color: #cbd5e1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.tagAccent {
+  color: var(--accent);
+}
+
+.visorFrame {
+  position: absolute;
+  left: var(--mx);
+  top: var(--my);
+  width: var(--vw);
+  height: var(--vh);
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--border-accent);
+  border-radius: 999px;
+  box-shadow: 0 8px 22px rgba(76, 141, 255, 0.2);
+  pointer-events: none;
+}
+
+.noise {
+  position: absolute;
+  inset: 0;
+  opacity: var(--scanline-opacity, 0.08);
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(242, 245, 247, 0.11) 0px,
+      rgba(242, 245, 247, 0.11) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    radial-gradient(circle at 1px 1px, rgba(242, 245, 247, 0.07) 1px, transparent 0);
+  background-size: 100% 4px, 4px 4px;
+}
+
+.noise,
+.visorFrame {
+  -webkit-mask-image: radial-gradient(
+    ellipse calc(var(--vw) * 0.54) calc(var(--vh) * 0.58) at var(--mx) var(--my),
+    #000 0%,
+    #000 var(--soft),
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse calc(var(--vw) * 0.54) calc(var(--vh) * 0.58) at var(--mx) var(--my),
+    #000 0%,
+    #000 var(--soft),
+    transparent 100%
+  );
+}
+
+.introSweep {
+  position: absolute;
+  top: 0;
+  width: calc(var(--vw) * 0.75);
+  height: var(--vh);
+  border: 1px solid var(--border-accent);
+  border-radius: 999px;
+  background: var(--accent-soft);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.staticReveal .revealMask {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.staticReveal .visorFrame,
+.staticReveal .noise,
+.staticReveal .introSweep {
+  display: none;
+}
+
+@supports not ((-webkit-mask-image: radial-gradient(circle, #000, transparent)) or (mask-image: radial-gradient(circle, #000, transparent))) {
+  .revealMask,
+  .noise,
+  .visorFrame {
+    -webkit-mask-image: none;
+    mask-image: none;
+    clip-path: ellipse(calc(var(--vw) * 0.54) calc(var(--vh) * 0.58) at var(--mx) var(--my));
+  }
+}
+
+@media (max-width: 768px), (hover: none), (pointer: coarse) {
+  .root {
+    --vw: 250px;
+    --vh: 136px;
+  }
+
+  .hud {
+    display: none;
+  }
+}
