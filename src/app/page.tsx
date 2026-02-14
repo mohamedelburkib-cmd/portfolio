@@ -27,6 +27,7 @@ const VALUE_TAGS = ["Ops Analytics", "Commercial Insights", "BI Storytelling"];
 type Project = {
   title: string;
   year: string;
+  decisionFrame: string;
   context: string;
   insight: string;
   action: string;
@@ -65,12 +66,13 @@ const SKILLS: SkillData[] = [
   {
     id: "sql",
     name: "SQL",
-    description: "Query design, cohort slicing, and diagnostic analysis pipelines.",
+    description: "Structuring business questions into diagnostic queries — from customer risk to operational bottlenecks.",
     projectCount: 3,
     projects: [
       {
         title: "E-Commerce Revenue Analysis",
         year: "2024",
+        decisionFrame: "Which customers should we protect, and where does over-reliance on a few accounts become a revenue risk?",
         context: "Analysed UK retail transactions to surface concentration risk.",
         insight: "Top 5 percent of customers accounted for 23 percent of revenue.",
         action: "Prioritized high-dependency accounts for weekly monitoring and pricing guardrails.",
@@ -85,6 +87,7 @@ const SKILLS: SkillData[] = [
       {
         title: "Customer RFM Segmentation",
         year: "2024",
+        decisionFrame: "Which customers are worth re-engaging now, and what does that mean in concrete terms for marketing and ops to own?",
         context: "Built an action-ready customer segmentation model for retention strategy.",
         insight: "Segmented 4,300+ customers into five lifecycle-based priority cohorts.",
         action: "Mapped each segment to retention plays and ownership across marketing and ops.",
@@ -99,6 +102,7 @@ const SKILLS: SkillData[] = [
       {
         title: "Product Performance Diagnostics",
         year: "2024",
+        decisionFrame: "Which products are quietly tying up cash, and what should we do about stock allocation this quarter before it compounds?",
         context: "Mapped SKU velocity and inventory drag to improve allocation decisions.",
         insight: "Identified 127 SKUs linked to GBP45K in tied-up capital.",
         action: "Introduced weekly exception flags to rebalance stock and de-prioritize low-yield SKUs.",
@@ -115,12 +119,13 @@ const SKILLS: SkillData[] = [
   {
     id: "powerbi",
     name: "Power BI",
-    description: "Executive dashboards with drill-down pathways and decision cues.",
+    description: "Multi-market KPI visibility built for leadership decisions — with clear ownership and drill paths, not just charts.",
     projectCount: 1,
     projects: [
       {
         title: "Executive Sales Command Center",
         year: "2024",
+        decisionFrame: "How does leadership get a clean, single view of cross-market performance without needing an analyst to prep every weekly deck?",
         context: "Designed a KPI cockpit for leadership to monitor cross-market health.",
         insight: "Unified a GBP8.5M revenue view across 38 countries in one report surface.",
         action: "Standardized KPI definitions and added role-based drill paths for faster reviews.",
@@ -137,12 +142,13 @@ const SKILLS: SkillData[] = [
   {
     id: "tableau",
     name: "Tableau",
-    description: "Story-first visuals that explain behavior and conversion movement.",
+    description: "Lifecycle and conversion stories that surface where intervention actually matters — not just where the numbers drop.",
     projectCount: 1,
     projects: [
       {
         title: "Customer Journey Funnel",
         year: "2024",
+        decisionFrame: "Where in the customer lifecycle is the biggest conversion opportunity, and what would recovery actually mean in revenue terms?",
         context: "Visualized lifecycle drop-off to expose the most valuable intervention points.",
         insight: "Highlighted a 67 percent first-to-repeat conversion opportunity.",
         action: "Proposed a targeted reactivation sequence for first-time buyers within 30 days.",
@@ -595,7 +601,12 @@ function SkillCard({ skill, isActive, onToggle }: { skill: SkillData; isActive: 
                     </div>
                   </div>
 
-                  <div className="mt-4 space-y-2 rounded-xl border p-3" style={{ borderColor: "var(--border)", backgroundColor: "rgba(22,26,33,0.52)" }}>
+                  <div className="mt-4 rounded-xl border p-3" style={{ borderColor: "rgba(95,168,168,0.22)", backgroundColor: "rgba(95,168,168,0.04)" }}>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: "var(--accent)" }}>Decision Frame</p>
+                    <p className="mt-1 text-sm italic leading-relaxed" style={{ color: "var(--text-muted)" }}>{project.decisionFrame}</p>
+                  </div>
+
+                  <div className="mt-3 space-y-2 rounded-xl border p-3" style={{ borderColor: "var(--border)", backgroundColor: "rgba(22,26,33,0.52)" }}>
                     <p className="font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: "var(--accent)" }}>Insight</p>
                     <p className="text-sm" style={{ color: "var(--text)" }}>{project.insight}</p>
                     <p className="font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: "var(--accent)" }}>Action</p>
@@ -666,7 +677,7 @@ export default function Portfolio() {
   const navTabs = useMemo<NavTab[]>(
     () => [
       { title: "Hero", href: "#hero", icon: <HomeIcon /> },
-      { title: "Tools", href: "#work", icon: <CodeIcon /> },
+      { title: "Work", href: "#work", icon: <CodeIcon /> },
       { title: "Journey", href: "#story", icon: <UserIcon /> },
       { title: "Connect", href: "#contact", icon: <MailIcon /> },
     ],
@@ -751,8 +762,9 @@ export default function Portfolio() {
               className="mt-7 max-w-xl text-base leading-relaxed md:text-lg"
               style={{ color: "var(--text-muted)" }}
             >
-              Transforming operational reality into decision-ready analytics. I bridge warehouse pressure,
-              commercial priorities, and dashboard clarity so teams can act with confidence.
+              My background in economics and logistics operations built an instinct for what decision is
+              actually being made — before I open a file. I target operations, commercial, and risk roles
+              where that domain context turns analysis into action, not just another dashboard.
             </motion.p>
             <motion.div
               initial={reduceMotion ? false : { opacity: 0, y: 18 }}
@@ -800,7 +812,7 @@ export default function Portfolio() {
 
       <section id="work" className="relative z-10 scroll-mt-24 px-6 py-20">
         <div className="mx-auto max-w-6xl">
-          <ChapterHeader number="02" title="Tools + Proof" />
+          <ChapterHeader number="02" title="Work + Decisions" />
           <motion.h2
             initial={{ opacity: 0, y: 18 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -808,10 +820,10 @@ export default function Portfolio() {
             className="text-5xl uppercase tracking-tight text-white md:text-7xl"
             style={{ fontFamily: "var(--font-bebas-neue), Impact, sans-serif" }}
           >
-            Tools of the <span style={{ color: "var(--accent)" }}>Trade</span>
+            Analysis That <span style={{ color: "var(--accent)" }}>Drives Decisions</span>
           </motion.h2>
           <p className="mt-4 max-w-2xl" style={{ color: "var(--text-muted)" }}>
-            Expand each category to review project context, insight statements, core methods, and a next-step CTA.
+            Each project starts with the business decision it was meant to inform. Expand to review the framing, insight, action, and outcome.
           </p>
 
           <div className="mt-10 grid gap-4">
@@ -852,22 +864,34 @@ export default function Portfolio() {
                 grounded, and focused on decisions that can actually be executed.
               </p>
 
-              <div className="mt-7 rounded-xl border p-4" style={{ borderColor: "var(--border)", backgroundColor: "rgba(22,26,33,0.54)" }}>
-                <p className="font-mono text-xs uppercase tracking-[0.16em]" style={{ color: "var(--accent)" }}>What I do now</p>
-                <ul className="mt-3 space-y-2 text-sm" style={{ color: "var(--text)" }}>
-                  <li>Build diagnostic dashboards that speed decisions.</li>
-                  <li>Identify operational constraints and risk before escalation.</li>
-                  <li>Turn messy processes into measurable, trackable flows.</li>
-                  <li>Translate stakeholder questions into clear KPI paths.</li>
-                </ul>
+              <div className="mt-7 rounded-xl border p-4" style={{ borderColor: "rgba(95,168,168,0.28)", backgroundColor: "rgba(95,168,168,0.04)" }}>
+                <p className="font-mono text-xs uppercase tracking-[0.16em]" style={{ color: "var(--accent)" }}>My story in one paragraph</p>
+                <p className="mt-3 text-sm leading-relaxed" style={{ color: "var(--text)" }}>
+                  My background in economics and Amazon operations developed an instinct for what a business
+                  question actually looks like before it becomes a data request. I&apos;m targeting operations
+                  and commercial analyst roles where I can combine that stakeholder context with SQL depth
+                  and BI delivery — analysis that earns trust, not just looks good on a screen.
+                </p>
+              </div>
+
+              <div className="mt-4 rounded-xl border p-4" style={{ borderColor: "var(--border)", backgroundColor: "rgba(22,26,33,0.54)" }}>
+                <p className="font-mono text-xs uppercase tracking-[0.16em]" style={{ color: "var(--accent)" }}>Target industries</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {["Logistics & Supply Chain", "Retail & E-Commerce", "Operations Analytics", "Commercial Finance"].map((ind) => (
+                    <span key={ind} className="rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.12em]" style={{ borderColor: "var(--border-strong)", color: "var(--text)" }}>
+                      {ind}
+                    </span>
+                  ))}
+                </div>
               </div>
 
               <div className="mt-4 rounded-xl border p-4" style={{ borderColor: "var(--border)", backgroundColor: "rgba(255,255,255,0.01)" }}>
-                <p className="font-mono text-xs uppercase tracking-[0.16em]" style={{ color: "var(--accent)" }}>What I&apos;m building / learning</p>
+                <p className="font-mono text-xs uppercase tracking-[0.16em]" style={{ color: "var(--accent)" }}>What I do</p>
                 <ul className="mt-3 space-y-2 text-sm" style={{ color: "var(--text-muted)" }}>
-                  <li>Portfolio of SQL, Power BI, and Tableau case studies with proof artefacts.</li>
-                  <li>Deeper analytics engineering practices for reusable reporting pipelines.</li>
-                  <li>Operational signal models linking process bottlenecks to commercial outcomes.</li>
+                  <li>Frame the business decision before touching the data.</li>
+                  <li>Identify operational and revenue risk before it becomes impact.</li>
+                  <li>Turn stakeholder questions into measurable KPI paths.</li>
+                  <li>Build dashboards teams actually use — with owners and actions attached.</li>
                 </ul>
               </div>
             </div>
