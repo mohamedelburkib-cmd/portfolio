@@ -4,28 +4,64 @@ import { animate, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./HeroVisorReveal.module.css";
 
-export const VISOR_W = 320;
-export const VISOR_H = 168;
-export const LERP = 0.2;
-export const SCANLINE_OPACITY = 0.03;
+export const VISOR_W = 380;
+export const VISOR_H = 220;
+export const LERP = 0.18;
+export const SCANLINE_OPACITY = 0.02;
 
-const TAGS = ["SQL", "Power BI", "Tableau", "Ops Analytics"];
+// Rotating lens "scenes" — each shows different analytics data
+const LENS_SCENES = [
+  {
+    metrics: [
+      { label: "Revenue at risk", value: "23%" },
+      { label: "Accounts flagged", value: "47" },
+      { label: "Confidence", value: "0.91" },
+    ],
+    sql: ["SELECT", " customer_id, ", "SUM", "(revenue)"],
+    bars: [0.4, 0.72, 0.55, 0.88, 0.65, 0.92, 0.48, 0.78],
+  },
+  {
+    metrics: [
+      { label: "Cohort size", value: "4,312" },
+      { label: "Repeat rate", value: "34%" },
+      { label: "LTV delta", value: "+£18.4" },
+    ],
+    sql: ["NTILE", "(5) ", "OVER", " (ORDER BY recency)"],
+    bars: [0.88, 0.65, 0.42, 0.35, 0.22, 0.18, 0.12, 0.08],
+  },
+  {
+    metrics: [
+      { label: "Tied capital", value: "£45K" },
+      { label: "Slow SKUs", value: "127" },
+      { label: "Release est.", value: "£22K" },
+    ],
+    sql: ["RANK", "() ", "OVER", " (PARTITION BY category)"],
+    bars: [0.2, 0.35, 0.5, 0.42, 0.68, 0.75, 0.88, 0.95],
+  },
+  {
+    metrics: [
+      { label: "Markets", value: "38" },
+      { label: "Revenue", value: "£8.5M" },
+      { label: "Prep saved", value: "30%" },
+    ],
+    sql: ["MEASURE", " = ", "CALCULATE", "(SUM(Sales))"],
+    bars: [0.6, 0.72, 0.58, 0.82, 0.7, 0.65, 0.9, 0.55],
+  },
+];
+
 const SWEEP_DURATION_S = 1.12;
+const HAS_FINE_POINTER_QUERY = "(hover: hover) and (pointer: fine)";
 
 type HeroVisorRevealProps = {
   nameLine1: string;
   nameLine2: string;
-  roleLine?: string;
   hudLabel?: string;
 };
-
-const HAS_FINE_POINTER_QUERY = "(hover: hover) and (pointer: fine)";
 
 export default function HeroVisorReveal({
   nameLine1,
   nameLine2,
-  roleLine = "DATA ANALYST",
-  hudLabel = "PROFILE",
+  hudLabel = "ANALYSIS LENS",
 }: HeroVisorRevealProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
@@ -34,7 +70,7 @@ export default function HeroVisorReveal({
   const currentRef = useRef({ x: 0.5, y: 0.46 });
   const reduceMotion = useReducedMotion();
   const [introFinished, setIntroFinished] = useState(false);
-  const [tagIndex, setTagIndex] = useState(0);
+  const [sceneIndex, setSceneIndex] = useState(0);
   const [canHover, setCanHover] = useState(true);
 
   const staticReveal = useMemo(
@@ -42,7 +78,9 @@ export default function HeroVisorReveal({
     [reduceMotion, canHover]
   );
   const introComplete = staticReveal || introFinished;
+  const scene = LENS_SCENES[sceneIndex];
 
+  // Detect pointer capability
   useEffect(() => {
     if (typeof window === "undefined") return;
     const media = window.matchMedia(HAS_FINE_POINTER_QUERY);
@@ -52,14 +90,16 @@ export default function HeroVisorReveal({
     return () => media.removeEventListener("change", onChange);
   }, []);
 
+  // Rotate lens scenes
   useEffect(() => {
     const timer = window.setInterval(
-      () => setTagIndex((current) => (current + 1) % TAGS.length),
-      2200
+      () => setSceneIndex((c) => (c + 1) % LENS_SCENES.length),
+      3200
     );
     return () => window.clearInterval(timer);
   }, []);
 
+  // Intro sweep animation
   useEffect(() => {
     const element = containerRef.current;
     if (!element) return;
@@ -75,7 +115,6 @@ export default function HeroVisorReveal({
     const width = element.clientWidth;
     const from = -VISOR_W * 0.7;
     const to = width + VISOR_W * 0.7;
-    const centerY = element.clientHeight * 0.46;
 
     const controls = animate(from, to, {
       duration: SWEEP_DURATION_S,
@@ -88,7 +127,7 @@ export default function HeroVisorReveal({
         targetRef.current.x = clamped;
         targetRef.current.y = 0.46;
         element.style.setProperty("--mx", `${clamped * 100}%`);
-        element.style.setProperty("--my", `${(centerY / Math.max(1, element.clientHeight)) * 100}%`);
+        element.style.setProperty("--my", "46%");
       },
       onComplete: () => setIntroFinished(true),
     });
@@ -96,6 +135,7 @@ export default function HeroVisorReveal({
     return () => controls.stop();
   }, [staticReveal]);
 
+  // Pointer tracking
   useEffect(() => {
     if (staticReveal || !introComplete) return;
     const element = containerRef.current;
@@ -116,41 +156,26 @@ export default function HeroVisorReveal({
     const updateTarget = (clientX: number, clientY: number) => {
       const rect = element.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) return;
-      const x = (clientX - rect.left) / rect.width;
-      const y = (clientY - rect.top) / rect.height;
-      targetRef.current.x = Math.max(0, Math.min(1, x));
-      targetRef.current.y = Math.max(0, Math.min(1, y));
+      targetRef.current.x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+      targetRef.current.y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
     };
 
     rafRef.current = window.requestAnimationFrame(tick);
 
-    const onMove = (event: PointerEvent) => {
-      updateTarget(event.clientX, event.clientY);
-    };
-
-    const onEnter = (event: PointerEvent) => {
-      pointerInsideRef.current = true;
-      updateTarget(event.clientX, event.clientY);
-    };
-
-    const onLeave = () => {
-      pointerInsideRef.current = false;
-    };
-
-    const onDown = (event: PointerEvent) => {
-      updateTarget(event.clientX, event.clientY);
-    };
+    const onMove = (e: PointerEvent) => updateTarget(e.clientX, e.clientY);
+    const onEnter = (e: PointerEvent) => { pointerInsideRef.current = true; updateTarget(e.clientX, e.clientY); };
+    const onLeave = () => { pointerInsideRef.current = false; };
 
     element.addEventListener("pointermove", onMove, { passive: true });
     element.addEventListener("pointerenter", onEnter);
     element.addEventListener("pointerleave", onLeave);
-    element.addEventListener("pointerdown", onDown);
+    element.addEventListener("pointerdown", onMove);
 
     return () => {
       element.removeEventListener("pointermove", onMove);
       element.removeEventListener("pointerenter", onEnter);
       element.removeEventListener("pointerleave", onLeave);
-      element.removeEventListener("pointerdown", onDown);
+      element.removeEventListener("pointerdown", onMove);
       if (rafRef.current !== null) {
         window.cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
@@ -163,11 +188,9 @@ export default function HeroVisorReveal({
     <div
       ref={containerRef}
       tabIndex={0}
-      className={[
-        styles.root,
-        staticReveal ? styles.staticReveal : "",
-      ].join(" ")}
+      className={[styles.root, staticReveal ? styles.staticReveal : ""].join(" ")}
     >
+      {/* Base layer: faded ghost name */}
       <div className={styles.baseLayer}>
         <h1 className={[styles.title, styles.baseTitle].join(" ")}>
           <span className="block">{nameLine1}</span>
@@ -175,31 +198,70 @@ export default function HeroVisorReveal({
         </h1>
       </div>
 
+      {/* Reveal layer: bright name visible through lens */}
       <div className={[styles.revealLayer, styles.revealMask].join(" ")}>
         <h1 className={[styles.title, styles.revealText].join(" ")}>
           <span className="block">{nameLine1}</span>
-          <span className={styles.roleSwap}>{roleLine}</span>
+          <span className="block">{nameLine2}</span>
         </h1>
-        <p className={styles.revealMeta}>OPERATIONS, COMMERCIAL AND RISK ANALYTICS</p>
-        <p className={styles.tags}>
-          <span className={styles.tagAccent}>FOCUS</span>
-          <span> | </span>
-          <span>{staticReveal ? TAGS.join(" | ") : TAGS[tagIndex]}</span>
-        </p>
         <span className={styles.hud}>{hudLabel}</span>
       </div>
 
-      {!staticReveal && introComplete ? <span aria-hidden className={styles.visorFrame} /> : null}
-      {!staticReveal && introComplete ? <span aria-hidden className={styles.noise} /> : null}
+      {/* Lens analytics overlay — the creative part */}
+      {!staticReveal && introComplete ? (
+        <div className={styles.lensContent} aria-hidden>
+          {/* Mini bar chart */}
+          <div className={styles.lensChart}>
+            {scene.bars.map((h, i) => (
+              <div key={i} className={styles.lensBar} style={{ height: `${h * 100}%` }} />
+            ))}
+          </div>
 
+          {/* Metrics */}
+          {scene.metrics.map((m) => (
+            <div key={m.label} className={styles.lensMetric}>
+              <span>{m.label}</span>
+              <span className={styles.lensValue}>{m.value}</span>
+            </div>
+          ))}
+
+          {/* SQL snippet */}
+          <div className={styles.lensSql}>
+            <span className={styles.lensSqlKeyword}>{scene.sql[0]}</span>
+            {scene.sql[1]}
+            <span className={styles.lensSqlKeyword}>{scene.sql[2]}</span>
+            {scene.sql[3]}
+          </div>
+        </div>
+      ) : null}
+
+      {/* Visor frame with corner brackets */}
+      {!staticReveal && introComplete ? (
+        <>
+          <span aria-hidden className={styles.visorFrame}>
+            <span className={styles.cornerTL} />
+            <span className={styles.cornerTR} />
+            <span className={styles.cornerBL} />
+            <span className={styles.cornerBR} />
+          </span>
+          <span aria-hidden className={styles.noise} />
+        </>
+      ) : null}
+
+      {/* Intro sweep */}
       {!staticReveal && !introComplete ? (
         <motion.span
           aria-hidden
           className={styles.introSweep}
-          initial={{ left: "-24%", opacity: 0.65 }}
-          animate={{ left: "112%", opacity: 0.22 }}
+          initial={{ left: "-24%", opacity: 0.6 }}
+          animate={{ left: "112%", opacity: 0.18 }}
           transition={{ duration: SWEEP_DURATION_S, ease: [0.22, 1, 0.36, 1] }}
         />
+      ) : null}
+
+      {/* Prompt hint */}
+      {!staticReveal && introComplete ? (
+        <span className={styles.promptHint}>Move cursor to explore</span>
       ) : null}
     </div>
   );
