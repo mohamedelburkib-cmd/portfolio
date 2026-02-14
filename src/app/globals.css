@@ -14,11 +14,12 @@
   --border-strong: rgba(255, 255, 255, 0.12);
   --background: var(--bg);
   --foreground: var(--text);
-  --border-accent: var(--border-strong);
-  --border-soft: var(--border);
   --card-bg: rgba(22, 22, 24, 0.8);
   --card-hover: rgba(28, 28, 31, 0.9);
   --envelope-bg: #111113;
+
+  --font-display: var(--font-bebas-neue), Impact, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
 body {
@@ -38,6 +39,150 @@ html { scroll-behavior: smooth; }
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); border-radius: 3px; }
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ── Spinning Words (hero role animation) ──────────── */
+.spinning-loader {
+  display: flex;
+  align-items: center;
+  height: 1.1rem;
+  overflow: visible;
+}
+.spinning-words {
+  overflow: hidden;
+  height: 1.1rem;
+  position: relative;
+}
+.spinning-words::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(#0a0a0b 10%, transparent 30%, transparent 70%, #0a0a0b 90%);
+  z-index: 20;
+  pointer-events: none;
+}
+.spinning-word {
+  display: block;
+  height: 100%;
+  padding-left: 4px;
+  color: #D2FF00;
+  animation: spin_words 6s infinite;
+}
+@keyframes spin_words {
+  10%  { transform: translateY(-102%); }
+  25%  { transform: translateY(-100%); }
+  35%  { transform: translateY(-202%); }
+  50%  { transform: translateY(-200%); }
+  60%  { transform: translateY(-302%); }
+  75%  { transform: translateY(-300%); }
+  85%  { transform: translateY(-402%); }
+  100% { transform: translateY(-400%); }
+}
+@keyframes float-chaos {
+  0%,100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(8px, -12px) rotate(3deg); }
+  50% { transform: translate(-5px, 6px) rotate(-2deg); }
+  75% { transform: translate(10px, 8px) rotate(4deg); }
+}
+
+/* ── Contact Widget ────────────────────────────────────── */
+.contact-main {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 13em;
+  height: 5em;
+  cursor: pointer;
+}
+
+.contact-blob {
+  position: absolute;
+  border-radius: 10px;
+  transform: rotate(90deg);
+  width: 11em;
+  height: 11em;
+  background: linear-gradient(270deg, #D2FF00, #03a9f4, #cc39a4);
+  z-index: 0;
+  box-shadow: inset 0px 0px 180px 5px #0a0a0b;
+  transition: opacity 0.4s ease-in-out;
+  pointer-events: none;
+}
+
+.contact-text {
+  position: absolute;
+  font-size: 0.65em;
+  font-family: "JetBrains Mono", monospace;
+  letter-spacing: 0.33em;
+  font-weight: bold;
+  color: #f0f0f0;
+  text-align: center;
+  z-index: 3;
+  transition: opacity 0.4s ease-in-out;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.contact-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid transparent;
+  transition: 0.4s ease-in-out, background-color 0.2s ease-in-out;
+  position: relative;
+  z-index: 1;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.contact-card:first-of-type {
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.contact-card:last-of-type {
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.contact-icon {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.contact-main:hover .contact-blob  { opacity: 0; }
+.contact-main:hover .contact-text  { opacity: 0; z-index: -3; }
+
+.contact-main:hover .contact-card {
+  margin: 0 0.2em;
+  border-radius: 10px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(22, 22, 24, 0.9);
+}
+
+.contact-main:hover .contact-icon { opacity: 1; }
+
+/* Email card */
+.contact-card-email .email-icon   { stroke: #cc39a4; fill: none; }
+.contact-card-email:hover         { background-color: #cc39a4 !important; }
+.contact-card-email:hover .email-icon { stroke: white; }
+
+/* LinkedIn card */
+.contact-card-linkedin .linkedin-icon { fill: #03a9f4; }
+.contact-card-linkedin:hover          { background-color: #03a9f4 !important; }
+.contact-card-linkedin:hover .linkedin-icon { fill: white; }
+
+/* GitHub card */
+.contact-card-github .github-icon { fill: #e0e0e0; }
+.contact-card-github:hover        { background-color: #e0e0e0 !important; }
+.contact-card-github:hover .github-icon { fill: #0a0a0b; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

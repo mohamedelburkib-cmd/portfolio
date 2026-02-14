@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { Bebas_Neue, Plus_Jakarta_Sans } from "next/font/google";
+import { Bebas_Neue, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import ReactiveBackground from "@/components/ReactiveBackground";
 
 const bebasNeue = Bebas_Neue({
   variable: "--font-bebas-neue",
@@ -14,22 +13,27 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
 });
 
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+});
+
 export const metadata: Metadata = {
   title: "Mohamed El-Burki | Data Analyst",
-  description: "Data Analyst Portfolio — Operations, Commercial & Risk Analytics. SQL, Power BI, Tableau, Excel, Financial Modelling.",
+  description:
+    "Data Analyst Portfolio — Operations, Commercial & Risk Analytics. SQL, Power BI, Tableau, Excel, Financial Modelling.",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${bebasNeue.variable} ${plusJakartaSans.variable}`}>
-      <body className="antialiased">
-        <ReactiveBackground />
-        {children}
-      </body>
+    <html
+      lang="en"
+      className={`${bebasNeue.variable} ${plusJakartaSans.variable} ${jetbrainsMono.variable}`}
+    >
+      <body className="antialiased">{children}</body>
     </html>
   );
 }
