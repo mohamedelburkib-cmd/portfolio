@@ -1,26 +1,24 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #0e0f12;
-  --bg-2: #12141a;
-  --surface: #161a21;
-  --surface-2: #1b2230;
-  --text: #edeff2;
-  --text-muted: #a7b0be;
-  --border: rgba(237, 239, 242, 0.08);
-  --border-strong: rgba(237, 239, 242, 0.14);
-  /* Accent options:
-     A studio off-white: #D6D2C4
-     B muted steel/teal: #5FA8A8
-     C graphite gold: #C7A76C */
-  --accent: #5fa8a8;
-  --accent-soft: rgba(95, 168, 168, 0.08);
-
-  /* Backward-compatible aliases used by current components */
+  --bg: #0a0a0b;
+  --bg-2: #111113;
+  --surface: #161618;
+  --surface-2: #1c1c1f;
+  --text: #f0f0f0;
+  --text-muted: #808086;
+  --accent: #D2FF00;
+  --accent-soft: rgba(210, 255, 0, 0.07);
+  --accent-mid: rgba(210, 255, 0, 0.18);
+  --border: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.12);
   --background: var(--bg);
   --foreground: var(--text);
   --border-accent: var(--border-strong);
   --border-soft: var(--border);
+  --card-bg: rgba(22, 22, 24, 0.8);
+  --card-hover: rgba(28, 28, 31, 0.9);
+  --envelope-bg: #111113;
 }
 
 body {
@@ -30,76 +28,20 @@ body {
   line-height: 1.6;
 }
 
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
-}
+html { scroll-behavior: smooth; }
 
-/* Custom selection */
 ::selection {
   background: var(--accent-soft);
   color: var(--foreground);
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-/* Perspective for 3D transforms */
-.perspective-1000 {
-  perspective: 1000px;
-}
-
-/* Marquee animation */
-@keyframes marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-.animate-marquee {
-  animation: marquee 30s linear infinite;
-}
-
-/* Glow pulse */
-@keyframes glow-pulse {
-  0%, 100% {
-    opacity: 0.5;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-.animate-glow-pulse {
-  animation: glow-pulse 2s ease-in-out infinite;
-}
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); border-radius: 3px; }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  *,
-  *::before,
-  *::after {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

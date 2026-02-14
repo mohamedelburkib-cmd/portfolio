@@ -16,7 +16,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: "Mohamed El-Burki | Data Analyst",
-  description: "Data Analyst Portfolio - Transforming raw data into strategic decisions. SQL, Power BI, Tableau.",
+  description: "Data Analyst Portfolio — Operations, Commercial & Risk Analytics. SQL, Power BI, Tableau, Excel, Financial Modelling.",
 };
 
 export default function RootLayout({
