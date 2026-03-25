@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bebas_Neue, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import ReactiveBackground from "@/components/ReactiveBackground";
 
 const bebasNeue = Bebas_Neue({
   variable: "--font-bebas-neue",
@@ -22,7 +23,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Mohamed El-Burki | Data Analyst",
   description:
-    "Data Analyst Portfolio — Operations, Commercial & Risk Analytics. SQL, Power BI, Tableau, Excel, Financial Modelling.",
+    "Data Analyst Portfolio - Operations, Commercial and Risk Analytics. SQL, Power BI, Tableau, Excel, Financial Modelling.",
 };
 
 export default function RootLayout({
@@ -33,7 +34,10 @@ export default function RootLayout({
       lang="en"
       className={`${bebasNeue.variable} ${plusJakartaSans.variable} ${jetbrainsMono.variable}`}
     >
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <ReactiveBackground />
+        {children}
+      </body>
     </html>
   );
 }

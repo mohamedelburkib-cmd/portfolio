@@ -42,19 +42,19 @@ const spanVariants = {
   exit: { width: 0, opacity: 0 },
 };
 
-const transition = { delay: 0.05, type: "spring", bounce: 0, duration: 0.5 };
+const transition = { delay: 0.05, type: "spring", bounce: 0, duration: 0.5 } as const;
 
 export function ExpandableTabs({
   tabs,
   className,
-  activeColor = "text-[#D2FF00]",
+  activeColor = "text-[var(--accent)]",
   onChange,
 }: ExpandableTabsProps) {
   const [selected, setSelected] = React.useState<number | null>(null);
   const [hovered, setHovered] = React.useState<number | null>(null);
-  const outsideClickRef = React.useRef(null);
+  const outsideClickRef = React.useRef<HTMLDivElement>(null);
 
-  useOnClickOutside(outsideClickRef, () => {
+  useOnClickOutside(outsideClickRef as React.RefObject<HTMLElement>, () => {
     setSelected(null);
     onChange?.(null);
   });
@@ -66,7 +66,7 @@ export function ExpandableTabs({
   };
 
   const SeparatorEl = () => (
-    <div className="mx-1 h-[20px] w-[1px] bg-white/10" aria-hidden="true" />
+    <div className="mx-1 h-[20px] w-[1px]" style={{ backgroundColor: "var(--border)" }} aria-hidden="true" />
   );
 
   return (
@@ -74,9 +74,10 @@ export function ExpandableTabs({
       ref={outsideClickRef}
       className={cn(
         "flex flex-wrap items-center gap-1 rounded-2xl border p-1.5 backdrop-blur-md",
-        "border-white/10 bg-[rgba(22,22,24,0.92)]",
+        "bg-[var(--surface)]/90",
         className
       )}
+      style={{ borderColor: "var(--border)" }}
     >
       {tabs.map((tab, index) => {
         if (tab.type === "separator") {
@@ -101,8 +102,8 @@ export function ExpandableTabs({
             className={cn(
               "relative flex items-center rounded-xl py-2 font-mono text-[10px] uppercase tracking-[0.1em] transition-colors duration-200",
               isSelected
-                ? cn("bg-white/8", activeColor)
-                : "text-[var(--text-muted)] hover:bg-white/5 hover:text-[var(--text)]"
+                ? cn("bg-[var(--surface-2)]", activeColor)
+                : "text-[var(--text-muted)] hover:bg-[var(--surface-2)]/70 hover:text-[var(--text)]"
             )}
           >
             <Icon size={16} />
