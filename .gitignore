@@ -1,0 +1,10 @@
+node_modules/
+.next/
+.env*
+!.env.example
+# Never commit bank statements or anything parsed from them
+*.pdf
+*.csv
+statements/
+data/
+*.local.json
